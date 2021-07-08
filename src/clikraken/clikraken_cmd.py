@@ -19,11 +19,13 @@ import sys
 import clikraken.global_vars as gv
 import clikraken.clikraken_utils as ck_utils
 
+from clikraken.api.public.ask import ask
 from clikraken.api.public.asset_pairs import asset_pairs
+from clikraken.api.public.bid import bid
 from clikraken.api.public.depth import depth
 from clikraken.api.public.last_trades import last_trades
-from clikraken.api.public.ticker import ticker
 from clikraken.api.public.ohlc import ohlc
+from clikraken.api.public.ticker import ticker
 
 from clikraken.api.private.cancel_order import cancel_order
 from clikraken.api.private.get_balance import get_balance
@@ -127,6 +129,24 @@ def parse_args():
     parser_depth.add_argument('-p', '--pair', default=gv.DEFAULT_PAIR, help=pair_help)
     parser_depth.add_argument('-c', '--count', type=int, default=7, help="maximum number of asks/bids.")
     parser_depth.set_defaults(sub_func=depth)
+
+    # Ask
+    parser_ask = subparsers.add_parser(
+        'ask',
+        aliases=['a'],
+        help='[public] Get the current ask price',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser_ask.add_argument('-p', '--pair', default=gv.DEFAULT_PAIR, help=pair_help)
+    parser_ask.set_defaults(sub_func=ask)
+
+    # Bid
+    parser_ask = subparsers.add_parser(
+        'bid',
+        aliases=['b'],
+        help='[public] Get the current bid price',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser_ask.add_argument('-p', '--pair', default=gv.DEFAULT_PAIR, help=pair_help)
+    parser_ask.set_defaults(sub_func=bid)
 
     # List of last trades
     parser_last_trades = subparsers.add_parser(
