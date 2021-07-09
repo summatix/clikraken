@@ -8,6 +8,8 @@ This module submits a limit order at the latest mid price.
 Licensed under the Apache License, Version 2.0. See the LICENSE file.
 """
 
+import time
+
 from decimal import Decimal
 
 from clikraken.api.api_utils import query_api
@@ -15,6 +17,7 @@ from clikraken.log_utils import logger
 
 
 ORDER_EXPIRATION_SECONDS = 30
+SECONDS_BETWEEN_STATUS_CHECKS = 5
 
 
 def smart_market(args):
@@ -58,6 +61,18 @@ def smart_market(args):
             logger.info('Validating inputs only. Order not submitted!')
         else:
             logger.warn('Order was NOT successfully added!')
-    else:
-        for tx in txid:
-            print(tx)
+
+        return
+
+    txid = txid[0]
+    logger.info("Placed order %s", txid)
+
+    # Wait for order to close
+    while True:
+        time.sleep(SECONDS_BETWEEN_STATUS_CHECKS)
+
+        res = query_api('private', 'ClosedOrders', {}, args)
+
+        if txid in res['closed'].keys():
+            logger.info('Trade was closed')
+            return
