@@ -16,21 +16,27 @@ from clikraken.api.api_utils import query_api
 from clikraken.log_utils import logger
 
 
+MID_POSITION_INCREMENT = 10
 ORDER_EXPIRATION_SECONDS = 30
 SECONDS_BETWEEN_STATUS_CHECKS = 5
+STARTING_MID_POSITION = 50
 VOLUME_DECIMALS = 12
 
 
-def _get_mid_price(pair, args, round_to_decimals = 2):
+def _get_mid_price(pair, mid_position, args, round_to_decimals = 2):
     """Gets the latest mid price for a pair."""
     res = query_api('public', 'Depth', {
         'pair': pair,
         'count': 1
     }, args)
 
-    ask = res[pair]['asks'][0][0]
-    bid = res[pair]['bids'][0][0]
-    return round((Decimal(ask) + Decimal(bid)) / 2, round_to_decimals)
+    ask = Decimal(res[pair]['asks'][0][0])
+    bid = Decimal(res[pair]['bids'][0][0])
+
+    return round(
+        bid + ((ask - bid) * Decimal(mid_position / 100)),
+        round_to_decimals
+    )
 
 
 def _place_order(pair, price, amount, validate, args):
@@ -69,10 +75,11 @@ def _place_order(pair, price, amount, validate, args):
 
 def smart_market(args):
     """Place a smart market order."""
+    mid_position = STARTING_MID_POSITION
     amount_to_buy = Decimal(args.amount)
 
     # Place the first order
-    mid = _get_mid_price(args.pair, args)
+    mid = _get_mid_price(args.pair, mid_position, args)
     txid = _place_order(args.pair, mid, amount_to_buy, args.validate, args)
     if not txid:
         return
@@ -96,8 +103,9 @@ def smart_market(args):
             if amount_to_buy <= 0:
                 return
 
-            # Place another order
-            mid = _get_mid_price(args.pair, args)
+            # Place another order at a higher mid price
+            mid_position = mid_position + MID_POSITION_INCREMENT
+            mid = _get_mid_price(args.pair, mid_position, args)
             txid = _place_order(args.pair, mid, amount_to_buy, args.validate, args)
             if not txid:
                 return
