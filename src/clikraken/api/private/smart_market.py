@@ -18,54 +18,61 @@ from clikraken.log_utils import logger
 
 ORDER_EXPIRATION_SECONDS = 30
 SECONDS_BETWEEN_STATUS_CHECKS = 5
+VOLUME_DECIMALS = 12
 
 
-def smart_market(args):
-    """Place a smart market order."""
-
+def _get_mid_price(pair, args, round_to_decimals = 2):
+    """Gets the latest mid price for a pair."""
     res = query_api('public', 'Depth', {
-        'pair': args.pair,
+        'pair': pair,
         'count': 1
     }, args)
 
-    ask = res[args.pair]['asks'][0][0]
-    bid = res[args.pair]['bids'][0][0]
-    mid = round((Decimal(ask) + Decimal(bid)) / 2, 2)
+    ask = res[pair]['asks'][0][0]
+    bid = res[pair]['bids'][0][0]
+    return round((Decimal(ask) + Decimal(bid)) / 2, round_to_decimals)
 
-    volume = round(Decimal(args.amount) / mid, 12)
+
+def _place_order(pair, price, amount, validate, args):
+    """Place an order for the given pair."""
+    volume = round(Decimal(amount) / price, VOLUME_DECIMALS)
 
     api_params = {
         'expiretm': '+{}'.format(ORDER_EXPIRATION_SECONDS),
         'ordertype': 'limit',
-        'pair': args.pair,
-        'price': mid,
+        'pair': pair,
+        'price': price,
         'type': 'buy',
         'volume': volume
     }
 
-    if args.validate:
+    if validate:
         api_params['validate'] = 'true'
 
-    logger.info('Placing buy order of %s %s at limit %s', volume, args.pair, mid)
-
     res = query_api('private', 'AddOrder', api_params, args)
-
-    descr = res.get('descr')
-    odesc = descr.get('order', 'No description available!')
-    print(odesc)
+    logger.info(res.get('descr').get('order', 'No description available!'))
 
     txid = res.get('txid')
 
     if not txid:
-        if args.validate:
+        if validate:
             logger.info('Validating inputs only. Order not submitted!')
         else:
             logger.warn('Order was NOT successfully added!')
 
-        return
+        return ""
 
     txid = txid[0]
     logger.info("Placed order %s", txid)
+    return txid
+
+
+def smart_market(args):
+    """Place a smart market order."""
+    mid = _get_mid_price(args.pair, args)
+    txid = _place_order(args.pair, mid, args.amount, args.validate, args)
+    if not txid:
+        return
 
     # Wait for order to close
     while True:
