@@ -17,6 +17,7 @@ from clikraken.log_utils import logger
 
 
 MID_POSITION_INCREMENT = 10
+MINIMUM_PURCHASE = 2
 ORDER_EXPIRATION_SECONDS = 30
 SECONDS_BETWEEN_STATUS_CHECKS = 5
 STARTING_MID_POSITION = 50
@@ -100,7 +101,7 @@ def smart_market(args):
 
             amount_to_buy = amount_to_buy - purchased
 
-            if amount_to_buy <= 0:
+            if amount_to_buy <= MINIMUM_PURCHASE:
                 return
 
             # Place another order at a higher mid price
