@@ -38,6 +38,7 @@ from clikraken.api.private.list_closed_orders import list_closed_orders
 from clikraken.api.private.list_open_orders import list_open_orders
 from clikraken.api.private.list_open_positions import list_open_positions
 from clikraken.api.private.place_order import place_order
+from clikraken.api.private.smart_market import smart_market
 from clikraken.api.private.trades import trades
 
 
@@ -228,6 +229,17 @@ def parse_args():
                               help="disable 'post-only' option (for limit taker orders)")
     parser_place.add_argument('-v', '--validate', action='store_true', help="validate inputs only. do not submit order")
     parser_place.set_defaults(sub_func=place_order)
+
+    # Place a smart market order
+    parser_smart_market = subparsers.add_parser(
+        'smartmarket',
+        aliases=['sm'],
+        help='[private] Place a smart market order',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser_smart_market.add_argument('amount', type=Decimal)
+    parser_smart_market.add_argument('-p', '--pair', default=gv.DEFAULT_PAIR, help=pair_help)
+    parser_smart_market.add_argument('-v', '--validate', action='store_true', help="validate inputs only. do not submit order")
+    parser_smart_market.set_defaults(sub_func=smart_market)
 
     # cancel an order
     parser_cancel = subparsers.add_parser(
