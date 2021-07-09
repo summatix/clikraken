@@ -24,6 +24,7 @@ from clikraken.api.public.asset_pairs import asset_pairs
 from clikraken.api.public.bid import bid
 from clikraken.api.public.depth import depth
 from clikraken.api.public.last_trades import last_trades
+from clikraken.api.public.mid import mid
 from clikraken.api.public.ohlc import ohlc
 from clikraken.api.public.ticker import ticker
 
@@ -147,6 +148,15 @@ def parse_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser_ask.add_argument('-p', '--pair', default=gv.DEFAULT_PAIR, help=pair_help)
     parser_ask.set_defaults(sub_func=bid)
+
+    # Mid
+    parser_ask = subparsers.add_parser(
+        'mid',
+        aliases=['m'],
+        help='[public] Get the current mid price',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser_ask.add_argument('-p', '--pair', default=gv.DEFAULT_PAIR, help=pair_help)
+    parser_ask.set_defaults(sub_func=mid)
 
     # List of last trades
     parser_last_trades = subparsers.add_parser(
