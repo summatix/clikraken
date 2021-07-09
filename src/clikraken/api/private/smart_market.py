@@ -69,17 +69,35 @@ def _place_order(pair, price, amount, validate, args):
 
 def smart_market(args):
     """Place a smart market order."""
+    amount_to_buy = Decimal(args.amount)
+
+    # Place the first order
     mid = _get_mid_price(args.pair, args)
-    txid = _place_order(args.pair, mid, args.amount, args.validate, args)
+    txid = _place_order(args.pair, mid, amount_to_buy, args.validate, args)
     if not txid:
         return
 
-    # Wait for order to close
+    # Wait for purchase to complete
     while True:
         time.sleep(SECONDS_BETWEEN_STATUS_CHECKS)
 
         res = query_api('private', 'ClosedOrders', {}, args)
 
         if txid in res['closed'].keys():
-            logger.info('Trade was closed')
-            return
+            purchased = Decimal(res['closed'][txid]["cost"])
+            if purchased > 0:
+                logger.info("Purchased %s of %s", purchased, args.pair)
+
+            else:
+                logger.info("Trade was closed without purchase")
+
+            amount_to_buy = amount_to_buy - purchased
+
+            if amount_to_buy <= 0:
+                return
+
+            # Place another order
+            mid = _get_mid_price(args.pair, args)
+            txid = _place_order(args.pair, mid, amount_to_buy, args.validate, args)
+            if not txid:
+                return
