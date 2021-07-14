@@ -2,3 +2,4 @@ arrow<0.14
 colorlog
 krakenex>=0.1,<1.0
 tabulate
+forex-python==1.6

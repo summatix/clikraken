@@ -26,6 +26,7 @@ from clikraken.api.public.depth import depth
 from clikraken.api.public.last_trades import last_trades
 from clikraken.api.public.mid import mid
 from clikraken.api.public.ohlc import ohlc
+from clikraken.api.public.rates import rates
 from clikraken.api.public.ticker import ticker
 
 from clikraken.api.private.cancel_order import cancel_order
@@ -187,6 +188,18 @@ def parse_args():
     parser_ohlc.add_argument('-c', '--count', type=int,
                              default=50, help="maximum number of intervals.")
     parser_ohlc.set_defaults(sub_func=ohlc)
+
+    # Rates
+    parser_rates = subparsers.add_parser(
+        'rates',
+        aliases=['r'],
+        help='[public] Gets the exchange rate for a given fiat currency pair',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser_rates.add_argument('-f', '--from', dest='from_currency', default='USD',
+                             help="the currency to convert from")
+    parser_rates.add_argument('-t', '--to', dest='to_currency', default='EUR',
+                             help="the currency to convert to")
+    parser_rates.set_defaults(sub_func=rates)
 
     # -----------
     # Private API
