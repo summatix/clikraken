@@ -251,7 +251,10 @@ def parse_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser_smart_market.add_argument('amount', type=Decimal)
     parser_smart_market.add_argument('-p', '--pair', default=gv.DEFAULT_PAIR, help=pair_help)
-    parser_smart_market.add_argument('-v', '--validate', action='store_true', help="validate inputs only. do not submit order")
+    parser_smart_market.add_argument('-c', '--currency', default='EUR',
+        help="the base currency for `amount`")
+    parser_smart_market.add_argument('-v', '--validate', action='store_true',
+        help="validate inputs only. do not submit order")
     parser_smart_market.set_defaults(sub_func=smart_market)
 
     # cancel an order

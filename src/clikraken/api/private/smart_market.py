@@ -9,8 +9,9 @@ Licensed under the Apache License, Version 2.0. See the LICENSE file.
 """
 
 import time
-
 from decimal import Decimal
+
+from forex_python.converter import CurrencyRates
 
 from clikraken.api.api_utils import query_api
 from clikraken.log_utils import logger
@@ -74,10 +75,19 @@ def _place_order(pair, price, amount, validate, args):
     return txid
 
 
+def _get_amount(amount, currency):
+    currency = currency.upper()
+    if currency == 'EUR':
+        return amount
+
+    rate = Decimal(CurrencyRates().get_rate(currency, 'EUR'))
+    return round(amount * rate, 2)
+
+
 def smart_market(args):
     """Place a smart market order."""
     mid_position = STARTING_MID_POSITION
-    amount_to_buy = Decimal(args.amount)
+    amount_to_buy = Decimal(_get_amount(args.amount, args.currency))
 
     # Place the first order
     mid = _get_mid_price(args.pair, mid_position, args)
