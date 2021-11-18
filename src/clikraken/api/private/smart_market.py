@@ -25,7 +25,7 @@ STARTING_MID_POSITION = 50
 VOLUME_DECIMALS = 12
 
 
-def _get_mid_price(pair, mid_position, args, round_to_decimals = 2):
+def _get_mid_price(pair, mid_position, args, round_to_decimals = 6):
     """Gets the latest mid price for a pair."""
     res = query_api('public', 'Depth', {
         'pair': pair,
