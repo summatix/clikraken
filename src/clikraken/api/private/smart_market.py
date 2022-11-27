@@ -50,7 +50,7 @@ def _place_order(pair, price, amount, validate, args):
         'ordertype': 'limit',
         'pair': pair,
         'price': price,
-        'type': 'buy',
+        'type': 'buy' if not args.sell else 'sell',
         'volume': volume
     }
 
