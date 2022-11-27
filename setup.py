@@ -18,11 +18,15 @@ with open('src/clikraken/__about__.py') as f:
     exec(f.read(), about)
 # now we have a about['__version__'] variable
 
+with open("requirements.txt", "r") as fh:
+    requirements = fh.readlines()
+
 setup(
     name=about['__title__'],
     version=about['__version__'],
     packages=find_packages('src'),
     package_dir={'': 'src'},
+    install_requires=[req for req in requirements if req[:2] != "# "],
     author=about['__author__'],
     author_email=about['__email__'],
     license=about['__license__'],
@@ -30,12 +34,6 @@ setup(
     long_description=long_description,
     include_package_data=True,
     url=about['__url__'],
-    install_requires=[
-        'krakenex>=0.1,<1.0',
-        'arrow<0.14',
-        'tabulate',
-        'colorlog',
-    ],
     classifiers=[
         "Programming Language :: Python",
         "Development Status :: 4 - Beta",
