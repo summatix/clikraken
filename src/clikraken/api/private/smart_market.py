@@ -115,7 +115,12 @@ def smart_market(args):
                 return
 
             # Place another order at a higher mid price
-            mid_position = mid_position + MID_POSITION_INCREMENT
+            if args.sell:
+                mid_position = mid_position - MID_POSITION_INCREMENT
+
+            else:
+                mid_position = mid_position + MID_POSITION_INCREMENT
+
             mid = _get_mid_price(args.pair, mid_position, args)
             txid = _place_order(args.pair, mid, amount_to_buy, args.validate, args)
             if not txid:
